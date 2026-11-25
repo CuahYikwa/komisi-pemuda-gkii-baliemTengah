@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Briefcase,
+  Building2,
   CalendarDays,
   DatabaseBackup,
   ExternalLink,
@@ -23,6 +24,7 @@ import { logoutAdmin, watchAdminAuthorization } from '../services/auth';
 import { loadPreferences, savePreferences } from '../services/storage';
 import { ActivityManager } from './ActivityManager';
 import { BackupManager } from './BackupManager';
+import { ChurchManager } from './ChurchManager';
 import { GalleryManager } from './GalleryManager';
 import { NewsManager } from './NewsManager';
 import { OrganizationManager } from './OrganizationManager';
@@ -36,6 +38,7 @@ type AdminTab =
   | 'activities'
   | 'gallery'
   | 'organization'
+  | 'churches'
   | 'programs'
   | 'social'
   | 'settings'
@@ -51,6 +54,7 @@ const NAV_ITEMS: Array<{
   { id: 'activities', label: 'Kegiatan', icon: CalendarDays },
   { id: 'gallery', label: 'Galeri Foto', icon: ImageIcon },
   { id: 'organization', label: 'Struktur Organisasi', icon: Users },
+  { id: 'churches', label: 'Data Jemaat', icon: Building2 },
   { id: 'programs', label: 'Program Kerja', icon: Briefcase },
   { id: 'social', label: 'Media Sosial', icon: Share2 },
   { id: 'settings', label: 'Pengaturan Website', icon: SettingsIcon },
@@ -60,7 +64,7 @@ const NAV_ITEMS: Array<{
 export function AdminDashboard() {
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
-  const { news, activities, gallery, members, programs, logs, loading } =
+  const { news, activities, gallery, members, programs, churches, logs, loading } =
     useAppData();
   const [activeTab, setActiveTab] = useState<AdminTab>(() => {
     const saved = loadPreferences().lastAdminTab as AdminTab | undefined;
@@ -96,6 +100,12 @@ export function AdminDashboard() {
     { label: 'Kegiatan', count: activities.length, color: '#1B3F70' },
     { label: 'Foto Galeri', count: gallery.length, color: '#C89B3C' },
     { label: 'Pengurus', count: members.length, color: '#2E5B9A' },
+    { label: 'Jemaat', count: churches.length, color: '#4C6B51' },
+    {
+      label: 'Pemuda Tercatat',
+      count: churches.reduce((total, church) => total + (church.youthCount ?? 0), 0),
+      color: '#A87E26',
+    },
     { label: 'Program', count: programs.length, color: '#A87E26' },
   ];
   const maxChart = Math.max(1, ...chartData.map((d) => d.count));
@@ -281,6 +291,24 @@ export function AdminDashboard() {
                         sub: 'Aktif di bagan struktur',
                         tab: 'organization' as AdminTab,
                       },
+                      {
+                        label: 'Jumlah Jemaat',
+                        value: churches.length,
+                        sub: 'Jemaat dan pos pelayanan',
+                        tab: 'churches' as AdminTab,
+                      },
+                      {
+                        label: 'Jumlah Pemuda',
+                        value: churches.reduce(
+                          (total, church) => total + (church.youthCount ?? 0),
+                          0
+                        ),
+                        sub: `${
+                          churches.filter((church) => church.youthCount !== null)
+                            .length
+                        } jemaat sudah didata`,
+                        tab: 'churches' as AdminTab,
+                      },
                     ].map((stat) => (
                       <button
                         key={stat.label}
@@ -415,6 +443,7 @@ export function AdminDashboard() {
             {activeTab === 'activities' && <ActivityManager />}
             {activeTab === 'gallery' && <GalleryManager />}
             {activeTab === 'organization' && <OrganizationManager />}
+            {activeTab === 'churches' && <ChurchManager />}
             {activeTab === 'programs' && <ProgramManager />}
             {activeTab === 'social' && <SocialManager />}
             {activeTab === 'settings' && <Settings />}

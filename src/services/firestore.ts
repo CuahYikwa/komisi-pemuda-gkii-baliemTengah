@@ -17,6 +17,7 @@ export type FirestoreCollectionName =
   | 'gallery'
   | 'members'
   | 'programs'
+  | 'churches'
   | 'logs';
 
 export async function getFirestoreItems<T>(

@@ -1,6 +1,7 @@
 import type {
   ActivityItem,
   ActivityLogEntry,
+  Congregation,
   GalleryPhoto,
   NewsItem,
   OrganizationMember,
@@ -8,6 +9,7 @@ import type {
 } from '../types';
 import {
   SEED_ACTIVITIES,
+  SEED_CHURCHES,
   SEED_GALLERY,
   SEED_LOGS,
   SEED_MEMBERS,
@@ -23,7 +25,7 @@ import {
 import { hasAdminAccess } from './auth';
 
 const DB_NAME = 'kpp_gkii_baliem_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export type StoreName =
   | 'news'
@@ -31,6 +33,7 @@ export type StoreName =
   | 'gallery'
   | 'members'
   | 'programs'
+  | 'churches'
   | 'logs';
 
 const STORES: StoreName[] = [
@@ -39,6 +42,7 @@ const STORES: StoreName[] = [
   'gallery',
   'members',
   'programs',
+  'churches',
   'logs',
 ];
 
@@ -147,16 +151,18 @@ export interface AllDatabaseData {
   gallery: GalleryPhoto[];
   members: OrganizationMember[];
   programs: WorkProgram[];
+  churches: Congregation[];
   logs: ActivityLogEntry[];
 }
 
 export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
-  const [news, activities, gallery, members, programs, logs] = await Promise.all([
+  const [news, activities, gallery, members, programs, churches, logs] = await Promise.all([
     getAllFromStore<NewsItem>('news'),
     getAllFromStore<ActivityItem>('activities'),
     getAllFromStore<GalleryPhoto>('gallery'),
     getAllFromStore<OrganizationMember>('members'),
     getAllFromStore<WorkProgram>('programs'),
+    getAllFromStore<Congregation>('churches'),
     getAllFromStore<ActivityLogEntry>('logs'),
   ]);
 
@@ -166,16 +172,18 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
     activities.length === 0 &&
     gallery.length === 0 &&
     members.length === 0 &&
-    programs.length === 0;
+    programs.length === 0 &&
+    churches.length === 0;
 
   try {
-    const [cloudNews, cloudActivities, cloudGallery, cloudMembers, cloudPrograms, cloudLogs] =
+    const [cloudNews, cloudActivities, cloudGallery, cloudMembers, cloudPrograms, cloudChurches, cloudLogs] =
       await Promise.all([
         getFirestoreItems<NewsItem>('news'),
         getFirestoreItems<ActivityItem>('activities'),
         getFirestoreItems<GalleryPhoto>('gallery'),
         getFirestoreItems<OrganizationMember>('members'),
         getFirestoreItems<WorkProgram>('programs'),
+        getFirestoreItems<Congregation>('churches'),
         getFirestoreItems<ActivityLogEntry>('logs'),
       ]);
 
@@ -184,7 +192,8 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
       cloudActivities.length === 0 &&
       cloudGallery.length === 0 &&
       cloudMembers.length === 0 &&
-      cloudPrograms.length === 0;
+      cloudPrograms.length === 0 &&
+      cloudChurches.length === 0;
 
     if (cloudIsEmpty) {
       const source = isEmpty
@@ -194,9 +203,18 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
             gallery: SEED_GALLERY,
             members: SEED_MEMBERS,
             programs: SEED_PROGRAMS,
+            churches: churches.length > 0 ? churches : SEED_CHURCHES,
             logs: SEED_LOGS,
           }
-        : { news, activities, gallery, members, programs, logs };
+        : {
+            news,
+            activities,
+            gallery,
+            members,
+            programs,
+            churches: churches.length > 0 ? churches : SEED_CHURCHES,
+            logs,
+          };
 
       if (await hasAdminAccess()) {
         await Promise.all([
@@ -205,6 +223,7 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
           replaceFirestoreItems('gallery', source.gallery),
           replaceFirestoreItems('members', source.members),
           replaceFirestoreItems('programs', source.programs),
+          replaceFirestoreItems('churches', source.churches),
           replaceFirestoreItems('logs', source.logs),
         ]);
       }
@@ -215,10 +234,21 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
         replaceLocally('gallery', source.gallery),
         replaceLocally('members', source.members),
         replaceLocally('programs', source.programs),
+        replaceLocally('churches', source.churches),
         replaceLocally('logs', source.logs),
       ]);
       localStorage.setItem(SEEDED_FLAG_KEY, 'true');
       return source;
+    }
+
+    const loadedChurches =
+      cloudChurches.length > 0
+        ? cloudChurches
+        : churches.length > 0
+          ? churches
+          : SEED_CHURCHES;
+    if (cloudChurches.length === 0 && (await hasAdminAccess())) {
+      await replaceFirestoreItems('churches', loadedChurches);
     }
 
     await Promise.all([
@@ -227,6 +257,7 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
       replaceLocally('gallery', cloudGallery),
       replaceLocally('members', cloudMembers),
       replaceLocally('programs', cloudPrograms),
+      replaceLocally('churches', loadedChurches),
       replaceLocally('logs', cloudLogs),
     ]);
     localStorage.setItem(SEEDED_FLAG_KEY, 'true');
@@ -236,6 +267,7 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
       gallery: cloudGallery,
       members: cloudMembers,
       programs: cloudPrograms,
+      churches: loadedChurches,
       logs: cloudLogs,
     };
   } catch (error) {
@@ -249,6 +281,7 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
       gallery: SEED_GALLERY,
       members: SEED_MEMBERS,
       programs: SEED_PROGRAMS,
+      churches: SEED_CHURCHES,
       logs: SEED_LOGS,
     };
     await Promise.all([
@@ -257,6 +290,7 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
       replaceLocally('gallery', source.gallery),
       replaceLocally('members', source.members),
       replaceLocally('programs', source.programs),
+      replaceLocally('churches', source.churches),
       replaceLocally('logs', source.logs),
     ]);
     localStorage.setItem(SEEDED_FLAG_KEY, 'true');
@@ -271,7 +305,11 @@ export async function initializeAndLoadDatabase(): Promise<AllDatabaseData> {
     await putLocally('members', chairman);
   }
 
-  return { news, activities, gallery, members, programs, logs };
+  const loadedChurches = churches.length > 0 ? churches : SEED_CHURCHES;
+  if (churches.length === 0) {
+    await replaceLocally('churches', loadedChurches);
+  }
+  return { news, activities, gallery, members, programs, churches: loadedChurches, logs };
 }
 
 export async function seedDefaultDatabase(): Promise<void> {
@@ -281,6 +319,7 @@ export async function seedDefaultDatabase(): Promise<void> {
     replaceFirestoreItems('gallery', SEED_GALLERY),
     replaceFirestoreItems('members', SEED_MEMBERS),
     replaceFirestoreItems('programs', SEED_PROGRAMS),
+    replaceFirestoreItems('churches', SEED_CHURCHES),
     replaceFirestoreItems('logs', SEED_LOGS),
   ]);
   await Promise.all([
@@ -289,6 +328,7 @@ export async function seedDefaultDatabase(): Promise<void> {
     replaceLocally('gallery', SEED_GALLERY),
     replaceLocally('members', SEED_MEMBERS),
     replaceLocally('programs', SEED_PROGRAMS),
+    replaceLocally('churches', SEED_CHURCHES),
     replaceLocally('logs', SEED_LOGS),
   ]);
   localStorage.setItem(SEEDED_FLAG_KEY, 'true');

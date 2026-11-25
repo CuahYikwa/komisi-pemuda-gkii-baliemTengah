@@ -197,6 +197,23 @@ test('validateBackupPayload accepts valid structure and rejects corrupt JSON', (
     }).valid,
     true
   );
+  assert.equal(
+    validateBackupPayload({
+      version: 2,
+      exportedAt: '2026-11-21',
+      source: 'test',
+      data: {
+        news: [],
+        activities: [],
+        gallery: [],
+        members: [],
+        programs: [],
+        churches: 'invalid',
+        settings: {},
+      },
+    }).valid,
+    false
+  );
 });
 
 test('formatDateID formats ISO dates cleanly in Indonesian', () => {

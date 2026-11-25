@@ -99,8 +99,8 @@ export function BackupManager() {
           Backup & Restore Data Website
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-          Ekspor seluruh berita, kegiatan, foto galeri, pengurus, program kerja,
-          dan pengaturan ke file JSON untuk dipindahkan ke perangkat lain.
+          Ekspor berita, kegiatan, foto galeri, pengurus, program kerja, data
+          jemaat, dan pengaturan ke file JSON untuk dipindahkan ke perangkat lain.
         </p>
       </div>
 
@@ -144,7 +144,7 @@ export function BackupManager() {
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             Mengunduh arsip lengkap berisi seluruh berita, kegiatan, foto
-            galeri, struktur pengurus, program kerja, dan pengaturan website.
+            galeri, struktur pengurus, program kerja, data jemaat, dan pengaturan website.
           </p>
           <button
             type="button"

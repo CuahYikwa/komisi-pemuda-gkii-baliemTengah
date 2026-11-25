@@ -1,6 +1,7 @@
 import type {
   ActivityItem,
   ActivityLogEntry,
+  Congregation,
   GalleryPhoto,
   NewsItem,
   OrganizationMember,
@@ -120,6 +121,29 @@ export const SEED_PROGRAMS: WorkProgram[] = [
     imageUrl: kopdaImage,
   },
 ];
+
+export const SEED_CHURCHES: Congregation[] = [
+  'GKII Jemaat Kora',
+  'GKII Jemaat Ekklesia',
+  'GKII Jemaat Moria',
+  'GKII Maranatha Pugima',
+  'GKII Effata',
+  'GKII Filadelfia Klisin',
+  'GKII Allah Ninom',
+  'GKII Pos PU Hunualek',
+  'GKII Pos PU Bukit Zaitun',
+  'GKII Smirna',
+  'GKII Edward Maxey - Seksi Pemuda',
+  'GKII Filadelfia',
+  'Seksi Pemuda Solafide',
+  'GKII Don Anderson - Seksi Pemuda',
+  'GKII Solagracia Sinakma',
+].map((name, index) => ({
+  id: `church-${String(index + 1).padStart(2, '0')}`,
+  name,
+  youthCount: null,
+  order: index + 1,
+}));
 
 export const SEED_LOGS: ActivityLogEntry[] = [
   {

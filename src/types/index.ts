@@ -113,6 +113,13 @@ export interface WorkProgram {
   imageUrl: string;
 }
 
+export interface Congregation {
+  id: string;
+  name: string;
+  youthCount: number | null;
+  order: number;
+}
+
 export interface SocialLinks {
   facebook: string;
   instagram: string;
@@ -137,7 +144,15 @@ export interface SiteSettings {
 export interface ActivityLogEntry {
   id: string;
   action: string;
-  module: 'Berita' | 'Kegiatan' | 'Galeri' | 'Struktur' | 'Program' | 'Pengaturan' | 'Backup';
+  module:
+    | 'Berita'
+    | 'Kegiatan'
+    | 'Galeri'
+    | 'Struktur'
+    | 'Program'
+    | 'Jemaat'
+    | 'Pengaturan'
+    | 'Backup';
   timestamp: string;
 }
 
@@ -151,6 +166,7 @@ export interface BackupPayload {
     gallery: GalleryPhoto[];
     members: OrganizationMember[];
     programs: WorkProgram[];
+    churches?: Congregation[];
     settings: SiteSettings;
   };
 }

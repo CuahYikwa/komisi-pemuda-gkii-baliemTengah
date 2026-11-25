@@ -225,6 +225,12 @@ export function validateBackupPayload(
         error: `Data "${key}" hilang atau rusak pada file backup.`,
       };
     }
+    if (data.churches !== undefined && !Array.isArray(data.churches)) {
+      return {
+        valid: false,
+        error: 'Data "churches" rusak pada file backup.',
+      };
+    }
   }
   if (!data.settings || typeof data.settings !== 'object') {
     return {

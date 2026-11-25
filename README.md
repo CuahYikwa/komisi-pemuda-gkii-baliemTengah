@@ -30,7 +30,11 @@ konten dashboard lain hanya diizinkan bagi akun dengan dokumen `admins/{UID}`.
 Firebase Auth dan aturan Firestore tetap memeriksa izin di server; proteksi UI
 dashboard bukan satu-satunya lapisan keamanan.
 
-Berita, kegiatan, galeri, struktur, program, dan pengaturan disimpan di
-Firestore dan dibaca dari sana oleh website publik. Gambar yang diunggah
+Berita, kegiatan, galeri, struktur, jemaat pelayanan, program, dan pengaturan
+disimpan di Firestore dan dibaca dari sana oleh website publik. Data jemaat
+dikelola melalui menu **Data Jemaat** di dashboard; jumlah pemuda yang belum
+diketahui dapat dibiarkan kosong dan jumlah pemuda tercatat dihitung otomatis.
+Pastikan aturan terbaru pada `firestore.rules` dipublikasikan agar admin dapat
+mengelola koleksi `churches`. Gambar yang diunggah
 dikompresi agar tetap berada di bawah batas ukuran dokumen Firestore; Firebase
 Storage tidak digunakan karena pada proyek ini memerlukan paket Blaze.

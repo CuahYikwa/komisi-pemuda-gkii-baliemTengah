@@ -21,6 +21,7 @@ import { About } from './pages/About';
 import { Activities } from './pages/Activities';
 import { AdminLogin } from './pages/AdminLogin';
 import { Contact } from './pages/Contact';
+import { Churches } from './pages/Churches';
 import { Gallery } from './pages/Gallery';
 import { Home } from './pages/Home';
 import { News } from './pages/News';
@@ -49,6 +50,7 @@ function AppShell() {
           <Route path="/" element={<Home />} />
           <Route path="/tentang" element={<About />} />
           <Route path="/struktur" element={<Organization />} />
+          <Route path="/jemaat" element={<Churches />} />
           <Route path="/program" element={<Programs />} />
           <Route path="/berita" element={<News />} />
           <Route path="/berita/:id" element={<NewsDetail />} />

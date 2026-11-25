@@ -52,6 +52,7 @@ export function Navbar() {
   const isOrgActive =
     pathname === '/tentang' ||
     pathname === '/struktur' ||
+    pathname === '/jemaat' ||
     pathname === '/program';
 
   const navLinkClass = (active: boolean) =>
@@ -150,6 +151,17 @@ export function Navbar() {
                     }`}
                   >
                     Struktur Organisasi
+                  </Link>
+                  <Link
+                    role="menuitem"
+                    to="/jemaat"
+                    className={`block px-4 py-2.5 text-sm transition-colors ${
+                      pathname === '/jemaat'
+                        ? 'text-[#DCB458] bg-white/10 font-semibold'
+                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    Jemaat Pelayanan
                   </Link>
                   <Link
                     role="menuitem"
@@ -259,6 +271,7 @@ export function Navbar() {
               { to: '/', label: 'Beranda' },
               { to: '/tentang', label: 'Tentang Kami' },
               { to: '/struktur', label: 'Struktur Organisasi' },
+              { to: '/jemaat', label: 'Jemaat Pelayanan' },
               { to: '/program', label: 'Program Kerja' },
               { to: '/berita', label: 'Berita' },
               { to: '/kegiatan', label: 'Kegiatan' },

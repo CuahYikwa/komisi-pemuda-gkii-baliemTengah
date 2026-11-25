@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type {
   ActivityItem,
   ActivityLogEntry,
+  Congregation,
   GalleryPhoto,
   NewsItem,
   OrganizationMember,
@@ -30,6 +31,7 @@ interface AppDataContextValue {
   gallery: GalleryPhoto[];
   members: OrganizationMember[];
   programs: WorkProgram[];
+  churches: Congregation[];
   logs: ActivityLogEntry[];
   settings: SiteSettings;
   refreshAll: () => Promise<void>;
@@ -43,6 +45,8 @@ interface AppDataContextValue {
   removeMember: (id: string, name?: string) => Promise<void>;
   upsertProgram: (program: WorkProgram) => Promise<void>;
   removeProgram: (id: string, name?: string) => Promise<void>;
+  upsertChurch: (church: Congregation) => Promise<void>;
+  removeChurch: (id: string, name?: string) => Promise<void>;
   updateSettings: (next: SiteSettings) => Promise<void>;
   resetToSeedData: () => Promise<void>;
   recordLog: (action: string, module: ActivityLogEntry['module']) => Promise<void>;
@@ -75,6 +79,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [programs, setPrograms] = useState<WorkProgram[]>([]);
+  const [churches, setChurches] = useState<Congregation[]>([]);
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
@@ -108,6 +113,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       setGallery(dbData.gallery);
       setMembers(dbData.members);
       setPrograms(dbData.programs);
+      setChurches(dbData.churches);
       setLogs(
         [...dbData.logs].sort((a, b) => b.timestamp.localeCompare(a.timestamp))
       );
@@ -268,6 +274,29 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     [recordLog]
   );
 
+  const upsertChurch = useCallback(
+    async (church: Congregation) => {
+      await putInStore('churches', church);
+      setChurches((prev) => {
+        const exists = prev.some((item) => item.id === church.id);
+        return exists
+          ? prev.map((item) => (item.id === church.id ? church : item))
+          : [...prev, church].sort((a, b) => a.order - b.order);
+      });
+      await recordLog(`Memperbarui jemaat "${church.name}"`, 'Jemaat');
+    },
+    [recordLog]
+  );
+
+  const removeChurch = useCallback(
+    async (id: string, name?: string) => {
+      await deleteFromStore('churches', id);
+      setChurches((prev) => prev.filter((church) => church.id !== id));
+      await recordLog(`Menghapus jemaat "${name || id}"`, 'Jemaat');
+    },
+    [recordLog]
+  );
+
   const updateSettings = useCallback(
     async (next: SiteSettings) => {
       await saveFirestoreSettings(next);
@@ -295,6 +324,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         gallery,
         members,
         programs,
+        churches,
         logs,
         settings,
         refreshAll,
@@ -308,6 +338,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         removeMember,
         upsertProgram,
         removeProgram,
+        upsertChurch,
+        removeChurch,
         updateSettings,
         resetToSeedData,
         recordLog,

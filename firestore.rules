@@ -19,6 +19,7 @@ service cloud.firestore {
         'gallery',
         'members',
         'programs',
+        'churches',
         'logs'
       ];
       allow write: if collection in [
@@ -27,6 +28,7 @@ service cloud.firestore {
         'gallery',
         'members',
         'programs',
+        'churches',
         'logs'
       ] && isAdmin();
     }
