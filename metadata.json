@@ -1,0 +1,8 @@
+{
+  "name": "Komisi Pemuda Pemudi GKII Baliem Tengah",
+  "description": "Website resmi Komisi Pemuda Pemudi GKII Baliem Tengah — pusat informasi pelayanan, struktur organisasi, program kerja, berita, kegiatan, dan galeri dokumentasi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
