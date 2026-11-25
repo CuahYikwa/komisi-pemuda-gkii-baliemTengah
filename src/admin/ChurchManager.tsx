@@ -5,6 +5,18 @@ import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import type { Congregation } from '../types';
 
+function getSaveErrorMessage(error: unknown, fallback: string): string {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'permission-denied'
+  ) {
+    return 'Firestore menolak perubahan. Pastikan aturan terbaru dari firestore.rules sudah dipublikasikan di Firebase Console dan akun admin memiliki dokumen admins/{UID}.';
+  }
+  return error instanceof Error ? error.message : fallback;
+}
+
 export function ChurchManager() {
   const { churches, upsertChurch, removeChurch } = useAppData();
   const { showToast } = useToast();
@@ -62,7 +74,10 @@ export function ChurchManager() {
       setFormOpen(false);
       showToast(editing ? 'Data jemaat berhasil diperbarui.' : 'Jemaat berhasil ditambahkan.');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menyimpan data jemaat.';
+      const message = getSaveErrorMessage(
+        err,
+        'Gagal menyimpan data jemaat.'
+      );
       setError(message);
       showToast(message, 'error');
     }
@@ -244,7 +259,7 @@ export function ChurchManager() {
               .then(() => showToast(`Jemaat "${deleteTarget.name}" telah dihapus.`, 'info'))
               .catch((err: unknown) =>
                 showToast(
-                  err instanceof Error ? err.message : 'Gagal menghapus data jemaat.',
+                  getSaveErrorMessage(err, 'Gagal menghapus data jemaat.'),
                   'error'
                 )
               );
